@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'base_view_model.dart';
 
 abstract class BaseScreen<T extends BaseViewModel> extends StatelessWidget {
@@ -6,7 +7,7 @@ abstract class BaseScreen<T extends BaseViewModel> extends StatelessWidget {
     initDependency();
   }
 
-  T? viewModel;
+  late T viewModel;
 
   void initDependency();
 }

@@ -7,4 +7,9 @@ abstract class BaseViewModel extends GetxController {
   void onInit() {
     super.onInit();
   }
+
+  @override
+  void onClose() {
+    super.onClose();
+  }
 }

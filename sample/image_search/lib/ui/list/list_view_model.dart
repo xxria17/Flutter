@@ -1,26 +1,51 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_search/base/base_view_model.dart';
-import 'package:image_search/main.dart';
+import 'package:image_search/data/model/image_data.dart';
+import 'package:image_search/data/repository/list_api.dart';
 
-class ListViewModel extends BaseViewModel with GetSingleTickerProviderStateMixin {
+import '../../main.dart';
+
+class ListViewModel extends BaseViewModel
+    with GetSingleTickerProviderStateMixin {
   static ListViewModel get to => Get.find();
 
-  late ScrollController scrollController;
-  late TextEditingController textController;
+  late ListApi _api;
+  RxList<dynamic> imgList = <Images>[].obs;
+  int page = 1;
+  RxBool isMoreRequesting = false.obs;
 
   @override
   void onInit() {
     super.onInit();
 
-    scrollController = ScrollController();
-    textController = TextEditingController();
-
+    _api = Get.find<ListApi>();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-    scrollController.dispose();
+  void getImgs(String input) {
+    imgList.clear();
+    page = 1;
+    isMoreRequesting = true.obs;
+    _api.getResultList(page: page, query: input).then((value) {
+      if (value.data != null) {
+        imgList.addAll(value.data!);
+      } else {
+        print("ListViewModel value is null :: $value");
+      }
+    }).onError((error, stackTrace) {
+      logger.e("api error", error, stackTrace);
+    });
+    isMoreRequesting = false.obs;
   }
+
+  void loadMore(String input) {
+    isMoreRequesting = true.obs;
+    page++;
+    _api.getResultList(page: page, query: input).then((value) {
+      imgList.addAll(value.data!);
+    }).onError((error, stackTrace) {
+      logger.e("load more api error", error, stackTrace);
+    });
+    isMoreRequesting = false.obs;
+  }
+
 }
