@@ -50,6 +50,8 @@ dependencies:
   flutter_countdown_timer: ^4.1.0
   loadmore: ^2.0.1
 
+  url_launcher: ^6.0.18
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

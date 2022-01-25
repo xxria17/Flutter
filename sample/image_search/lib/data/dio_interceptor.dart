@@ -4,7 +4,6 @@ import '../main.dart';
 class DioInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.queryParameters["service-type"] = "";
     logger.d(
         'REQUEST[${options.method}] => PATH: ${options.uri}, QUERY: ${options.queryParameters.toString()}, HEADER: ${options.headers}');
     return super.onRequest(options, handler);

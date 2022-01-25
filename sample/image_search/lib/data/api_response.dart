@@ -1,6 +1,8 @@
 import 'package:image_search/data/model/meta_data.dart';
 
-abstract class ApiResponse<T> {
+import 'model/image_data.dart';
+
+abstract class ApiResponse {
   MetaData? metaData;
-  T? data;
+  List<Images>? data;
 }

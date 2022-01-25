@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:image_search/base/base_stateful_screen.dart';
-import 'package:image_search/data/model/image_data.dart';
 import 'package:image_search/ui/detail/detail_view.dart';
 
 import 'list_view_model.dart';
@@ -34,9 +33,9 @@ class _ListScreen extends State<ListScreen> {
     _textController = TextEditingController();
 
     _scrollController.addListener(() {
-      if(_scrollController.offset >=
-      _scrollController.position.maxScrollExtent &&
-      !_scrollController.position.outOfRange) {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
         viewModel.loadMore(_textController.text);
       }
     });
@@ -44,6 +43,7 @@ class _ListScreen extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -56,81 +56,92 @@ class _ListScreen extends State<ListScreen> {
                     setState(() {
                       _isComposing = text.isNotEmpty;
                     });
+                    Future.delayed(const Duration(milliseconds: 1000), () => _handleSubmitted(text));
+                  },
+                  onSubmitted: (value) => {
+                    FocusScope.of(context).unfocus(),
+                    _handleSubmitted(value)
                   },
                   style: const TextStyle(color: Colors.blue),
                   keyboardType: TextInputType.text,
                   decoration: const InputDecoration(hintText: '검색어를 입력하세요.'),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: IconButton(
-                    icon: const Icon(Icons.send),
-                    color: Colors.blue,
-                    onPressed: _isComposing
-                        ? () => {_handleSubmitted(_textController.text)}
-                        : null),
-              )
             ],
           ),
         ),
         body: Column(
           children: [
             GetX<ListViewModel>(
-                init: viewModel,
-                builder: (controller) =>
-                    controller.initialized && controller.imgList.isNotEmpty
-                        ? GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3, childAspectRatio: 1 / 1),
-                            itemBuilder: (BuildContext context, int idx) {
-                              return GestureDetector(
-                                onTap: () => Navigator.pushNamed(
-                                    context, DetailScreen.routeName,
-                                    arguments: Images(
-                                        viewModel.imgList[idx]['imgUrl'],
-                                        viewModel.imgList[idx]['thumbnailUrl'],
-                                        viewModel.imgList[idx]['siteName'],
-                                        viewModel.imgList[idx]['dateTime'])),
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16)),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Image.network(
-                                      viewModel.imgList[idx]['thumbnailUrl'],
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                            controller: _scrollController,
-                          )
-                        : const Text('데이터가 없습니다.',
-                            style: TextStyle(fontSize: 16),
-                            textAlign: TextAlign.center)),
-            viewModel.isMoreRequesting.value
-                ? Container(
-                    height: 50.0,
-                    color: Colors.white,
-                    child: CircularProgressIndicator(),
-                  )
-                : Container(
-                    color: Colors.white,
-                    child: const Center(),
-                  )
+              init: viewModel,
+              builder: (controller) => controller.initialized &&
+                      controller.imgList.isNotEmpty
+                  ? Expanded(
+                      child: GridView.builder(
+                      itemCount: viewModel.imgList.length,
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3, childAspectRatio: 1 / 1),
+                      itemBuilder: (BuildContext context, int idx) {
+                        return GestureDetector(
+                          onTap: () => {
+                            Navigator.pushNamed(context, DetailScreen.routeName,
+                                arguments: viewModel.imgList[idx]),
+                            FocusScope.of(context).unfocus()
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                viewModel.imgList[idx].thumbnailUrl!,
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      controller: _scrollController,
+                    ))
+                  : Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(0, 100, 0, 0)
+                          ),
+                          Text('검색 결과가 없습니다.',
+                              style: TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center)
+                        ],
+                      )),
+            ),
+            GetX<ListViewModel>(
+              init: viewModel,
+              builder: (controller) =>
+                  controller.initialized && controller.isMoreRequesting.isNotEmpty && controller.isMoreRequesting[controller.isMoreRequesting.length - 1]
+                      ? showProgress()
+                      : Container(),
+            ),
           ],
         ));
   }
 
   void _handleSubmitted(String input) {
-    FocusScope.of(context).unfocus();
-    setState(() {
-      _isComposing = false;
-    });
-    viewModel.getImgs(input);
+    if (_isComposing && input.trim().length > 1) {
+      viewModel.getImgs(input.trim());
+    }
+  }
+
+  Widget showProgress() {
+    return Container(
+      height: 50.0,
+      color: Colors.white,
+      child: const CircularProgressIndicator(),
+    );
   }
 
   @override

@@ -18,7 +18,7 @@ var logger = Logger(
   level: kDebugMode ? Level.debug : Level.nothing
 );
 
-void main() {
+Future<void> main() async {
   runApp(const ImageSearchApp());
 }
 

@@ -6,13 +6,15 @@ import '../model/image_data.dart';
 part 'img_list_response.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class ImgListResponse implements ApiResponse<List<Images>> {
+class ImgListResponse implements ApiResponse {
   ImgListResponse({this.data});
 
   @override
+  @JsonKey(name: "documents")
   List<Images>? data;
 
   @override
+  @JsonKey(name: "meta")
   MetaData? metaData;
 
   factory ImgListResponse.fromJson(Map<String, dynamic> json) => _$ImgListResponseFromJson(json);

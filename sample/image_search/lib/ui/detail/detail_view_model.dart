@@ -10,13 +10,15 @@ class DetailViewModel extends BaseViewModel with GetSingleTickerProviderStateMix
   String date = "";
   String site = "";
   String img = "";
+  String url = "";
 
   void getData(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Images;
 
     img = args.imgUrl!;
     site = args.siteName!;
-    date = _convertDateTime(args.dateTime!);
+    date = _convertDateTime(args.datetime!);
+    url = args.docUrl!;
   }
 
   String _convertDateTime(String dateTime) {
